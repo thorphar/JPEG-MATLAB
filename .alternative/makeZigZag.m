@@ -1,0 +1,39 @@
+function [output] = makeZigZag( block_struct,flag,quant )
+%% quantization matrix     
+half_Y = [ 16 11 10 16 24 40 51 61;
+            12 12 14 19 26 58 60 55;
+            14 13 16 24 40 57 69 56;
+            14 17 22 29 51 87 80 62;
+            18 22 37 56 68 109 103 77;
+            24 35 55 64 81 104 113 92;
+            49 64 78 87 103 121 120 101;
+            72 92 95 98 112 100 103 99];
+half_Chrome = [17 18 24 47 99 99 99 99 ;
+               18 21 26 66 99 99 99 99 ;
+               24 26 56 99 99 99 99 99;
+               47 66 99 99 99 99 99 99 ;
+               99 99 99 99 99 99 99 99;
+               99 99 99 99 99 99 99 99;
+               99 99 99 99 99 99 99 99;
+               99 99 99 99 99 99 99 99];   
+if flag == 0
+    % Y channel
+    norm_data = double(block_struct) - (235+16)/2; % shifting data
+    dct2_data = (dct2(norm_data));%dct2 on shifted data 
+    %quantize the data
+    q_mtx = half_Y.*quant;  
+    QuantizedData = round(dct2_data ./ q_mtx);
+else
+   % Cb Cr channel
+    norm_data = double(block_struct) - (240+16)/2; % shifting data
+    dct2_data = (dct2(norm_data)); %dct2 on shifted data
+    %quantize the data
+    q_mtx = half_Chrome.*quant;  
+    QuantizedData = round(dct2_data ./ q_mtx);
+end
+
+%% EXTRACT ZIGZAG
+zzQuant = square2line(QuantizedData);
+output = zzQuant;
+end
+
